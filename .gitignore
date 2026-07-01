@@ -1,0 +1,13 @@
+dist/
+build/
+__pycache__/
+*.py[cod]
+*.pyo
+*.log
+
+.env
+.env.*
+!.env.example
+
+*.spec
+*.spec.bak
