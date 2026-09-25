@@ -82,8 +82,10 @@ function Quote-ProcessArg {
 }
 
 function Join-ProcessArgs {
-    param([string[]]$Args)
-    return (($Args | ForEach-Object { Quote-ProcessArg $_ }) -join ' ')
+    # Not named $Args: PowerShell replaces a parameter with that name by the automatic $args
+    # (the unbound arguments, empty here), so every command used to run with no arguments.
+    param([string[]]$ArgumentList)
+    return (($ArgumentList | ForEach-Object { Quote-ProcessArg $_ }) -join ' ')
 }
 
 function Invoke-LoggedProcess {
