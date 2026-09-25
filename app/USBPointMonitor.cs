@@ -41,6 +41,10 @@ namespace USBPointMonitorStable
 
     internal sealed class MainForm : Form
     {
+        // Size the layout is designed for; FitToWorkingArea shrinks it on smaller screens.
+        private static readonly Size DesignSize = new Size(1200, 800);
+        private static readonly Size DesignMinimumSize = new Size(940, 650);
+
         private TextBox logBox;
         private TextBox testPad;
         private ComboBox slotCombo;
@@ -73,6 +77,7 @@ namespace USBPointMonitorStable
             uiTimer.Tick += delegate { UpdateCaptureStatus(); };
             this.Load += delegate
             {
+                FitToWorkingArea();
                 AppendLog("USB POINT MONITOR stable v2 started.");
                 AppendLog("Admin: " + IsAdmin());
                 AppendLog("Capture engine: direct USBPcapCMD.exe, not tshark -D / extcap.");
@@ -85,9 +90,9 @@ namespace USBPointMonitorStable
         private void BuildUi()
         {
             Text = "USB Point Monitor - Stable v2";
-            Width = 1200;
-            Height = 800;
-            MinimumSize = new Size(940, 650);
+            Width = DesignSize.Width;
+            Height = DesignSize.Height;
+            MinimumSize = DesignMinimumSize;
             StartPosition = FormStartPosition.CenterScreen;
 
             Panel top = new Panel();
@@ -243,6 +248,26 @@ namespace USBPointMonitorStable
             logBox.Font = new Font("Consolas", 9f);
             logPanel.Controls.Add(logBox);
             logBox.BringToFront();
+        }
+
+        // Keeps the whole window above the taskbar: inside the work area of the monitor it opens on.
+        private void FitToWorkingArea()
+        {
+            Rectangle workArea = Screen.FromControl(this).WorkingArea;
+            MinimumSize = new Size(Math.Min(DesignMinimumSize.Width, workArea.Width), Math.Min(DesignMinimumSize.Height, workArea.Height));
+            Bounds = FitBounds(workArea, DesignSize);
+        }
+
+        // The preferred size, shrunk where needed to fit inside the work area, centered in it.
+        internal static Rectangle FitBounds(Rectangle workArea, Size preferred)
+        {
+            int width = Math.Min(preferred.Width, workArea.Width);
+            int height = Math.Min(preferred.Height, workArea.Height);
+            return new Rectangle(
+                workArea.X + (workArea.Width - width) / 2,
+                workArea.Y + (workArea.Height - height) / 2,
+                width,
+                height);
         }
 
         private Button MakeButton(string text, int left, int top, int width)
